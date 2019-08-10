@@ -1,0 +1,69 @@
+#' A function for running an iteration of a monte carlo simulation.
+#'
+#' `simulateTrip` takes a set of information regarding asteroids, solar flares, and
+#' fuel requirements that
+#'
+#' @export
+#'
+#' @param baseFuel A list with the keys `copula`, `meanlog`, and `sdlog`. The `copula`
+#'   value must be a numeric specifying the parameter of a Clayton copula. The `meanlog`
+#'   and `sdlog` keys define a lognormal distribution that models the base amount of
+#'   fuel needed for the journey.
+#' @param solarFlares A list with the keys `fuel`, `lambda`, `scale`, and `shape`.
+#'   `fuel` is a list with `meanlog` and `sdlog`. These define a lognormal distribution
+#'   that models the amount of additional fuel needed due to a solar flare. `lambda`
+#'   characterizes a poisson distribution that models the number of solar flares
+#'   occurring on the trip. The `scale` and `shape` parameters define a gamma
+#'   distribution that models the intensity of solar flares.
+#' @param asteroids A list with the keys `fuel` and `lambda`. `fuel` is a list with
+#'   the keys `mean` and `sd` which define a normal distribution that models the
+#'   additional fuel needed due to avoiding an asteroid. `lambda` characterizes a
+#'   poisson distribution that models the number of asteroids occurring on the trip.
+#' @return A list with the following properties: `numSolarFlares`, `flareSurface`,
+#'   `baseFuel`, `flareAdditionalFuel`, `asteroidSegments`, `asteroidsPerSegment`,
+#'   `asteroidAdditionalFuel`, and `totalFuel`.
+
+simulateTrip <- function(baseFuel, solarFlares, asteroids) {
+  surfaceFuelDependenceCop <- copula::claytonCopula(baseFuel$copula, dim = 2)
+
+  baseFuel <- rlnorm(1, meanlog = baseFuel$meanlog, sdlog = baseFuel$sdlog)
+
+  # Solar flares occurring during trip
+  numSolarFlares <- rpois(1, lambda = solarFlares$lambda)
+  flareSurface <- rgamma(numSolarFlares, shape = solarFlares$shape, scale = solarFlares$scale)
+  flareSurfaceUnif <- pgamma(flareSurface, shape = solarFlares$shape, scale = solarFlares$scale)
+  flareAdditionalFuelUnif <- copula::cCopula(
+    u = as.matrix(
+      cbind(
+        flareSurfaceUnif,
+        runif(numSolarFlares)
+      )
+    ),
+    cop = surfaceFuelDependenceCop,
+    j.ind = 2,
+    inverse = T
+  )
+  # Additional required fuel due to solar flares, converted to millions of pounds
+  flareAdditionalFuel <- qlnorm(flareAdditionalFuelUnif, meanlog = solarFlares$fuel$meanlog, sdlog = solarFlares$fuel$sdlog)/10
+
+  # Asteroids along path
+  asteroidsOnPath <- rpois(10000000, lambda = asteroids$lambda)
+  asteroidSegments <- which(asteroidsOnPath > 0)
+  numAsteroids <- sum(asteroidsOnPath)
+  # Additional required fuel due to dodging asteroids, converted to millions of pounds
+  asteroidAdditionalFuel <- rnorm(numAsteroids, mean = asteroids$fuel$mean, sd = asteroids$fuel$sd) / 10000
+
+  totalFuel <- baseFuel + sum(flareAdditionalFuel) + sum(asteroidAdditionalFuel)
+
+  response <- list(
+    numSolarFlares = numSolarFlares,
+    flareSurface = flareSurface,
+    baseFuel = baseFuel,
+    flareAdditionalFuel = flareAdditionalFuel,
+    asteroidSegments = asteroidSegments,
+    asteroidsPerSegment = asteroidsOnPath[asteroidSegments],
+    asteroidAdditionalFuel = asteroidAdditionalFuel,
+    totalFuel = totalFuel
+  )
+  return(response)
+}

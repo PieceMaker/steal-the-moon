@@ -1,0 +1,14 @@
+Package: stealTheMoon
+Type: Package
+Title: A Package for Demonstrating Use of rminions Package with Monte Carlo Simulation
+Version: 0.1.0
+Author: person("Jonathan", "Adams", email = "jd.adams16@gmail.com", role = c("aut", "cre"))
+Description: The purpose of this package is to provide a simple monte carlo simulation
+    used in the demonstration of the rminions package.
+Depends:
+    R (>= 3.6.1)
+Imports:
+    copula (>= 0.999-19.1)
+License: GPL-3
+LazyData: true
+RoxygenNote: 6.1.1
