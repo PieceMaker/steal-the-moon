@@ -13,8 +13,7 @@ RUN mkdir -p /R
 WORKDIR /R
 COPY ./stealTheMoon /R
 
-RUN r -e 'install.packages("devtools")' \
-    && r -e 'devtools::install()' \
+RUN r -e 'devtools::install()' \
     && chmod +x /R/runMinion.sh
 
 CMD [ "./runMinion.sh" ]
