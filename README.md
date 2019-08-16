@@ -2,6 +2,20 @@
 
 This project serves as a demonstration of using the R package [rminions](https://github.com/PieceMaker/rminions).
 
+## Installation
+
+In order to install the `stealTheMoon` package you will first need to install the `devtools` package.
+
+```R
+install.packages("devtools")
+```
+
+From here you can install the `stealTheMoon` package directly from GitHub.
+
+```R
+devtools::install_github("PieceMaker/rminions", subdir = 'stealTheMoon')
+```
+
 ## R Package
 
 This project includes an R package that contains functionality for running a simulation of a journey to and from the
@@ -44,3 +58,37 @@ docker run --rm moon-worker
 
 You should now have a simulation worker running that is connected to the central Redis server and awaiting requests on
 the queue `"jobsQueue"`.
+
+## Make Request
+
+The function `simulateTrip` requires a set of distributional inputs to run. These can be generated with the function
+`generateSimulationParameters`. This function returns a list of the three parameters `simulateTrip` accepts. You can
+run the function as follows:
+
+```R
+library(stealTheMoon)
+parameters <- generateSimulationParameters()
+simulateTrip(baseFuel = parameters$baseFuel, solarFlares = parameters$solarFlares, asteroids = parameters$asteroids)
+```
+
+If you wish to make the request to a minion worker, use the following code:
+
+```R
+reduxConn <- redux::hiredis(host = 'Gru-svr')
+parameters <- generateSimulationParameters()
+rminions::sendMessage(
+    conn = reduxConn,
+    package = 'stealTheMoon',
+    func = 'simulateTrip',
+    parameters = parameters
+)
+```
+
+Once the function has run, you can get the result via
+
+```R
+result <- rminions::getMessage(
+    conn = reduxConn,
+    queue = 'resultsQueue'
+)
+```
