@@ -80,7 +80,7 @@ rminions::sendMessage(
     conn = reduxConn,
     package = 'stealTheMoon',
     func = 'simulateTrip',
-    baseFuel = paramters$baseFuel,
+    baseFuel = parameters$baseFuel,
     solarFlares = parameters$solarFlares,
     asteroids = parameters$asteroids
 )
