@@ -16,6 +16,38 @@ From here you can install the `stealTheMoon` package directly from GitHub.
 devtools::install_github("PieceMaker/rminions", subdir = 'stealTheMoon')
 ```
 
+## Quickstart
+
+A Docker Compose file has been provided in this repository that will automatically start Redis and workers. It assumes
+the the Dockerfile in this repository has been built and tagged as `moon-worker`. To start a single instance of the
+server and 4 workers, change to the directory the `docker-compose.yaml` is located and simply run the following:
+
+```bash
+docker-compose up -d --scale redis=1 --scale worker=4
+```
+
+It should output the following:
+
+```bash
+Creating network "steal-the-moon_default" with the default driver
+Creating steal-the-moon_redis_1 ... done
+Creating steal-the-moon_worker_1 ... done
+Creating steal-the-moon_worker_2 ... done
+Creating steal-the-moon_worker_3 ... done
+Creating steal-the-moon_worker_4 ... done
+```
+
+The `-d` flag will ensure all instances are run in the background and the `--scale` options tell docker-compose how
+many of each service to run. The redis service exposes port 6379 so others can connect to the same instance.
+
+You can now test the workers by running the example in [Make Request](#make-request).
+
+To stop the workers, simply run in the same directory
+
+```bash
+docker-compose down
+```
+
 ## R Package
 
 This project includes an R package that contains functionality for running a simulation of a journey to and from the
