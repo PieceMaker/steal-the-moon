@@ -48,7 +48,7 @@ const requests = _.chain()
     .value();
 
 // Make requests
-Promise.map(_.range(100), () => {
+Promise.map(_.range(100), (id) => {
     // Determine unique response queue and use it to build job
     const resultsQueue = uuid();
     const job = {
@@ -56,7 +56,8 @@ Promise.map(_.range(100), () => {
         func: 'simulateTrip',
         parameters,
         resultsQueue,
-        errorQueue: resultsQueue
+        errorQueue: resultsQueue,
+        id // Sent job will be returned as response, so add an ID to the request for future use
     };
     // Push job to queue
     redis.rpush(jobsQueue, json.stringify(job));
