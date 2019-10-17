@@ -33,10 +33,10 @@ const jobsQueue = 'jobsQueue';
 const requests = _.chain()
     .range(100)
     .map(() => {
-        redis.rpush(jobsQueue, json.stringify(job));
+        redis.rpush(jobsQueue, JSON.stringify(job));
         return redis.brpop(job.resultsQueue, 0)
             .then((result) => {
-                result = json.parse(result);
+                result = JSON.parse(result);
                 if(result.status !== 'succeeded') {
                     console.error(result.error);
                     return result.error;
@@ -48,7 +48,7 @@ const requests = _.chain()
     .value();
 
 // Make requests
-Promise.map(_.range(100), (id) => {
+Promise.map(_.range(1), (id) => {
     // Determine unique response queue and use it to build job
     const resultsQueue = uuid();
     const job = {
@@ -60,11 +60,11 @@ Promise.map(_.range(100), (id) => {
         id // Sent job will be returned as response, so add an ID to the request for future use
     };
     // Push job to queue
-    redis.rpush(jobsQueue, json.stringify(job));
+    redis.rpush(jobsQueue, JSON.stringify(job));
     // Perform blocking pop on result queue that will wait for a response
     return redis.brpop(resultsQueue, 0)
         .then((resultJSON) => {
-            const result = json.parse(resultJSON);
+            const result = JSON.parse(resultJSON);
             if(result.status !== 'succeeded') {
                 console.error(result.error);
                 return result.error;
