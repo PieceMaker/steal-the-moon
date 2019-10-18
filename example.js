@@ -29,26 +29,8 @@ const parameters = {
 };
 const jobsQueue = 'jobsQueue';
 
-// Push 100 requests into queue
-const requests = _.chain()
-    .range(100)
-    .map(() => {
-        redis.rpush(jobsQueue, JSON.stringify(job));
-        return redis.brpop(job.resultsQueue, 0)
-            .then((result) => {
-                result = JSON.parse(result);
-                if(result.status !== 'succeeded') {
-                    console.error(result.error);
-                    return result.error;
-                } else {
-                    return result.results;
-                }
-            });
-    })
-    .value();
-
 // Make requests
-Promise.map(_.range(1), (id) => {
+bluebird.map(_.range(100), (id) => {
     // Determine unique response queue and use it to build job
     const resultsQueue = uuid();
     const job = {
@@ -63,7 +45,7 @@ Promise.map(_.range(1), (id) => {
     redis.rpush(jobsQueue, JSON.stringify(job));
     // Perform blocking pop on result queue that will wait for a response
     return redis.brpop(resultsQueue, 0)
-        .then((resultJSON) => {
+        .then(([key, resultJSON]) => {
             const result = JSON.parse(resultJSON);
             if(result.status !== 'succeeded') {
                 console.error(result.error);
@@ -75,4 +57,5 @@ Promise.map(_.range(1), (id) => {
 })
     .then((results) => {
         console.log(results);
+        process.exit(0);
     });
