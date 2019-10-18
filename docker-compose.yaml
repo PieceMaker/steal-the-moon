@@ -4,6 +4,7 @@ services:
     image: moon-worker:latest
     environment:
       - REDIS=redis
+      - USEJSON=true
     depends_on:
       - redis
 

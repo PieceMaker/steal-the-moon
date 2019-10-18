@@ -5,3 +5,6 @@
 stealTheMoon/.Rproj.user
 stealTheMoon/.Rhistory
 .Rproj.user
+
+# NodeJS module files
+node_modules/

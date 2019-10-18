@@ -103,7 +103,8 @@ parameters <- generateSimulationParameters()
 simulateTrip(baseFuel = parameters$baseFuel, solarFlares = parameters$solarFlares, asteroids = parameters$asteroids)
 ```
 
-If you wish to make the request to a minion worker, use the following code:
+If you wish to make the request to a minion worker, use the below code. Note that these function calls use the JSON
+format since this is what the docker compose file is configured for.
 
 ```R
 reduxConn <- redux::hiredis(host = 'Gru-svr')
@@ -114,7 +115,8 @@ rminions::sendMessage(
     func = 'simulateTrip',
     baseFuel = parameters$baseFuel,
     solarFlares = parameters$solarFlares,
-    asteroids = parameters$asteroids
+    asteroids = parameters$asteroids,
+    useJSON = T
 )
 ```
 
@@ -123,6 +125,27 @@ Once the function has run, you can get the result via
 ```R
 result <- rminions::getMessage(
     conn = reduxConn,
-    queue = 'resultsQueue'
+    queue = 'resultsQueue',
+    useJSON = T
 )
 ```
+
+## NodeJS Example
+
+An example communicating with the minions from a language other than R has been provided in this repository. The
+language chosen for this example is NodeJS. In order to run it you will need to install [NodeJS](https://nodejs.org/).
+Then install the required modules by running the following:
+
+```bash
+npm install
+```
+
+Assuming you are running the minions locally and they are accessible via JSON requests, then you can simply run the
+example as follows:
+
+```bash
+node example.js
+```
+
+This will connect to the Redis server, make 100 concurrent requests, and log the results to the console when all
+responses are received.
