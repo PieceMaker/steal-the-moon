@@ -103,7 +103,8 @@ parameters <- generateSimulationParameters()
 simulateTrip(baseFuel = parameters$baseFuel, solarFlares = parameters$solarFlares, asteroids = parameters$asteroids)
 ```
 
-If you wish to make the request to a minion worker, use the following code:
+If you wish to make the request to a minion worker, use the below code. Note that these function calls use the JSON
+format since this is what the docker compose file is configured for.
 
 ```R
 reduxConn <- redux::hiredis(host = 'Gru-svr')
@@ -114,7 +115,8 @@ rminions::sendMessage(
     func = 'simulateTrip',
     baseFuel = parameters$baseFuel,
     solarFlares = parameters$solarFlares,
-    asteroids = parameters$asteroids
+    asteroids = parameters$asteroids,
+    useJSON = T
 )
 ```
 
@@ -123,6 +125,7 @@ Once the function has run, you can get the result via
 ```R
 result <- rminions::getMessage(
     conn = reduxConn,
-    queue = 'resultsQueue'
+    queue = 'resultsQueue',
+    useJSON = T
 )
 ```
