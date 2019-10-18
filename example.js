@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const bluebird = require('bluebird');
 const Redis = require('ioredis');
-const redis = new Redis();
+const redis = new Redis(); // Change server here if minions are not running on localhost
 const uuid = require('uuid/v4');
 
 const parameters = {
