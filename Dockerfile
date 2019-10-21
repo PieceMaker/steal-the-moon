@@ -1,4 +1,4 @@
-FROM rminion
+FROM piecemaker/rminion
 MAINTAINER Jonathan Adams <jd.adams16@gmail.com>
 
 ENV REDIS "localhost"
