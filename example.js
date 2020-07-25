@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const bluebird = require('bluebird');
 const Redis = require('ioredis');
 const redis = new Redis(); // Change server here if minions are not running on localhost
@@ -28,9 +27,10 @@ const parameters = {
     }
 };
 const jobsQueue = 'jobsQueue';
+const integerArrayOfLength = length => [ ...Array(length).keys() ];
 
 // Make requests
-bluebird.map(_.range(100), (id) => {
+bluebird.map(integerArrayOfLength(100), (id) => {
     // Determine unique response queue and use it to build job
     const resultsQueue = uuid();
     const job = {
